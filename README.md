@@ -32,6 +32,6 @@ I’d love to collaborate or chat about anything tech-related (or just geek out 
 
 - [LinkedIn](https://www.linkedin.com/in/jaydencruz/)  
 - [GitHub](https://github.com/JaydenCruz2004)  
-- Email: [jayden.cruz@example.com](mailto:jayden.cruz@example.com)
+- Email: [jaydencruz.cs@gmail.com](mailto:jaydencruz.cs@gmail.com)
 
 Thanks for stopping by!
