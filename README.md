@@ -22,7 +22,6 @@ I’m always looking for opportunities to apply my skills in meaningful ways, wh
 This website serves as my digital portfolio where I showcase:
 - **Projects**: A collection of personal and academic projects highlighting my programming and problem-solving skills.
 - **Resume**: A detailed summary of my academic achievements, work experiences, and technical proficiencies.
-- **Blog/Updates**: Insights into what I’m learning and exploring in the tech world.
 
 ---
 
