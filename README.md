@@ -34,3 +34,17 @@ I’d love to collaborate or chat about anything tech-related (or just geek out 
 - Email: [jaydencruz.cs@gmail.com](mailto:jaydencruz.cs@gmail.com)
 
 Thanks for stopping by!
+
+---
+
+## ⚡️ Vercel Speed Insights
+
+This site now ships with the Vercel Speed Insights tracker so you can monitor Core Web Vitals for every page load.
+
+1. **Enable the feature**: In the [Vercel dashboard](https://vercel.com/dashboard), open your project → **Speed Insights** tab → **Enable**. This deploys the required `/_vercel/speed-insights/*` routes.
+2. **Keep the CLI handy** (optional but helpful): `pnpm i -g vercel` (or `npm i -g vercel`, `yarn global add vercel`, etc.) so you can run `vercel pull`/`vercel deploy` locally.
+3. **Deploy**: run `vercel deploy` (or push to the connected Git branch). After the deployment finishes, visit any page to start collecting real user performance data.
+4. **Verify**: View your site source—each HTML page now includes `<script defer src="/_vercel/speed-insights/script.js"></script>` along with a small initializer (`js/speed-insights.js`) that registers the current route.
+5. **Observe metrics**: Back in the dashboard, open the Speed Insights tab to explore LCP, FID, CLS, and other trends. Data appears after real traffic hits the site.
+
+If you disable Speed Insights in Vercel, the inline scripts will safely no-op.
