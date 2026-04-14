@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dog Adoption Rates Model</title>
+</head>
+<body>
+  <img src="assets/doglogo.png" alt="Dog logo" width="180">
+  <h1>Dog Adoption Rates Model</h1>
+
+  <h2>Dogs</h2>
+  <ul id="dog-list">
+    <!-- Dog names will be added here -->
+  </ul>
+
+  <h2>Dog Details</h2>
+  <div id="dog-details">
+    <p>Click a dog name to see more details.</p>
+  </div>
+
+  <script>
+    // Example data for now
+    // Later this can come from your database
+    const dogs = [
+      {
+        id: 1,
+        name: "Buddy",
+        breed: "Labrador",
+        age: 3,
+        adoptionRate: "High",
+        imageId: "buddy.jpg"
+      },
+      {
+        id: 2,
+        name: "Bella",
+        breed: "Beagle",
+        age: 5,
+        adoptionRate: "Medium",
+        imageId: "bella.jpg"
+      },
+      {
+        id: 3,
+        name: "Max",
+        breed: "German Shepherd",
+        age: 2,
+        adoptionRate: "Low",
+        imageId: "max.jpg"
+      }
+    ];
+
+    const dogList = document.getElementById("dog-list");
+    const dogDetails = document.getElementById("dog-details");
+
+    dogs.forEach(dog => {
+      const li = document.createElement("li");
+      const button = document.createElement("button");
+      button.textContent = dog.name;
+
+      button.addEventListener("click", () => {
+        dogDetails.innerHTML = `
+          <h3>${dog.name}</h3>
+          <p><strong>Breed:</strong> ${dog.breed}</p>
+          <p><strong>Age:</strong> ${dog.age}</p>
+          <p><strong>Adoption Rate:</strong> ${dog.adoptionRate}</p>
+          <p><strong>Image ID:</strong> ${dog.imageId}</p>
+          <img src="images/${dog.imageId}" alt="${dog.name}" width="200">
+        `;
+      });
+
+      li.appendChild(button);
+      dogList.appendChild(li);
+    });
+  </script>
+</body>
+</html>
