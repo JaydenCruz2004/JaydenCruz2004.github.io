@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dog Adoption Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --warm: #e8ddd0;
+    --bark: #3d2b1f;
+    --bark-light: #6b4c3b;
+    --paw: #c4622d;
+    --paw-light: #e8845a;
+    --grass: #4a7c59;
+    --sky: #5b8db8;
+    --gold: #d4a843;
+    --card: #fffdf9;
+    --shadow: rgba(61,43,31,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--cream); font-family:'DM Sans',sans-serif; color:var(--bark); }
+
+  /* HERO */
+  .hero {
+    background:var(--bark);
+    padding:64px 40px 52px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(ellipse at 20% 60%, rgba(196,98,45,0.2) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 20%, rgba(212,168,67,0.1) 0%, transparent 50%);
+  }
+  .hero-inner { position:relative; z-index:1; max-width:700px; margin:0 auto; }
+  .paw-bounce { font-size:52px; display:block; margin-bottom:18px; animation:bounce 2.2s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2rem,5vw,3.6rem); font-weight:900; color:var(--cream); line-height:1.08; letter-spacing:-0.02em; }
+  .hero h1 em { color:var(--paw-light); font-style:normal; }
+  .hero p { margin-top:18px; color:rgba(245,240,232,0.68); font-size:1.05rem; font-weight:300; line-height:1.65; }
+  .hero-meta { margin-top:22px; font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(245,240,232,0.35); }
+
+  /* CONTROLS */
+  .controls {
+    background:var(--card);
+    border-bottom:1px solid var(--warm);
+    padding:20px 40px;
+    display:flex;
+    align-items:center;
+    gap:36px;
+    flex-wrap:wrap;
+    position:sticky;
+    top:0;
+    z-index:100;
+    box-shadow:0 2px 14px var(--shadow);
+  }
+  .ctrl-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:180px; }
+  .ctrl-label { font-size:0.68rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--bark-light); }
+  .slider-row { display:flex; align-items:center; gap:10px; }
+  input[type=range] {
+    -webkit-appearance:none; flex:1; height:4px; border-radius:2px; outline:none; cursor:pointer;
+    background:linear-gradient(to right, var(--paw) 0%, var(--paw) var(--pct,0%), var(--warm) var(--pct,0%), var(--warm) 100%);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--paw);
+    border:3px solid white; box-shadow:0 2px 6px rgba(196,98,45,0.35); cursor:pointer; transition:transform .15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
+  .slider-val { font-size:0.9rem; font-weight:500; color:var(--paw); min-width:30px; text-align:right; }
+  .sort-sel {
+    background:var(--cream); border:1.5px solid var(--warm); border-radius:8px;
+    padding:7px 12px; font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--bark);
+    outline:none; cursor:pointer;
+  }
+  .sort-sel:focus { border-color:var(--paw); }
+  .badge { background:var(--paw); color:white; font-size:0.78rem; font-weight:500; padding:4px 14px; border-radius:20px; white-space:nowrap; }
+
+  /* GRID */
+  .grid-wrap { padding:36px 40px 64px; max-width:1440px; margin:0 auto; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(285px,1fr)); gap:24px; }
+
+  /* CARD */
+  .card {
+    background:var(--card); border-radius:18px; overflow:hidden;
+    box-shadow:0 2px 14px var(--shadow); cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease;
+    animation:fadeUp .4s ease both; position:relative;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+  .card:hover { transform:translateY(-7px); box-shadow:0 14px 36px var(--shadow); }
+
+  .card-photo {
+    width:100%; height:210px; object-fit:cover; display:block;
+    background:var(--warm);
+  }
+  .card-photo-placeholder {
+    width:100%; height:210px; display:flex; align-items:center; justify-content:center;
+    font-size:64px; background:var(--warm);
+  }
+
+  /* score badge */
+  .score-dot {
+    position:absolute; top:14px; right:14px;
+    width:54px; height:54px; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:white; font-weight:700; border:3px solid white;
+    box-shadow:0 3px 10px rgba(0,0,0,0.22);
+  }
+  .score-dot .snum { font-size:1rem; line-height:1; }
+  .sc-high   { background:var(--grass); }
+  .sc-med    { background:var(--gold); }
+  .sc-low    { background:var(--paw); }
+  .sc-none   { background:#aaa; }
+
+  .card-body { padding:18px 20px 20px; }
+  .card-name { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card-sub  { font-size:0.8rem; color:var(--bark-light); margin:3px 0 12px; }
+
+  .bar-wrap { margin-bottom:13px; }
+  .bar-labels { display:flex; justify-content:space-between; font-size:0.68rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:var(--bark-light); margin-bottom:4px; }
+  .bar-track { height:7px; background:var(--warm); border-radius:4px; overflow:hidden; }
+  .bar-fill  { height:100%; border-radius:4px; }
+
+  .pills { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:12px; }
+  .pill  { font-size:0.7rem; padding:3px 9px; border-radius:20px; background:var(--cream); color:var(--bark-light); border:1px solid var(--warm); }
+  .pill.free { background:#e8f4ed; color:var(--grass); border-color:#b8ddc5; }
+  .pill.fee  { background:#fdf3e7; color:#a0622d; border-color:#f0c990; }
+
+  .card-desc { font-size:0.78rem; color:var(--bark-light); line-height:1.55; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+  /* EMPTY */
+  .empty { grid-column:1/-1; text-align:center; padding:80px 20px; color:var(--bark-light); }
+  .empty .ei { font-size:56px; margin-bottom:14px; }
+
+  /* MODAL */
+  .overlay { display:none; position:fixed; inset:0; background:rgba(61,43,31,0.58); z-index:1000; backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px; }
+  .overlay.open { display:flex; }
+  .modal { background:var(--card); border-radius:22px; max-width:580px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:0 28px 70px rgba(0,0,0,0.28); animation:mIn .3s ease; }
+  @keyframes mIn { from{opacity:0;transform:scale(.94) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .modal-photo { width:100%; height:280px; object-fit:cover; border-radius:22px 22px 0 0; display:block; background:var(--warm); }
+  .modal-photo-ph { width:100%; height:280px; display:flex; align-items:center; justify-content:center; font-size:90px; background:var(--warm); border-radius:22px 22px 0 0; }
+  .modal-body { padding:28px; }
+  .modal-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+  .modal-name { font-family:'Playfair Display',serif; font-size:1.9rem; font-weight:900; line-height:1.1; }
+  .close-btn { background:var(--cream); border:none; width:36px; height:36px; border-radius:50%; font-size:1rem; cursor:pointer; color:var(--bark-light); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s; }
+  .close-btn:hover { background:var(--warm); }
+  .modal-score-box { background:var(--cream); border-radius:14px; padding:16px 20px; margin-bottom:20px; }
+  .msl { font-size:0.68rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--bark-light); margin-bottom:6px; }
+  .msv { font-family:'Playfair Display',serif; font-size:2.6rem; font-weight:900; line-height:1; margin-bottom:8px; }
+  .ms-track { height:10px; background:var(--warm); border-radius:5px; overflow:hidden; }
+  .ms-fill  { height:100%; border-radius:5px; }
+  .ms-note  { font-size:0.76rem; color:var(--bark-light); margin-top:6px; }
+  .modal-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+  .stat { background:var(--cream); border-radius:10px; padding:12px 14px; }
+  .stat-l { font-size:0.65rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--bark-light); margin-bottom:2px; }
+  .stat-v { font-size:0.92rem; font-weight:500; }
+  .desc-lbl { font-size:0.68rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--bark-light); margin-bottom:8px; }
+  .desc-txt { font-size:0.86rem; line-height:1.65; }
+
+  /* FOOTER */
+  footer { text-align:center; padding:28px; font-size:0.76rem; color:var(--bark-light); border-top:1px solid var(--warm); }
+  footer a { color:var(--paw); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="paw-bounce">🐾</span>
+    <h1>Dog Adoption <em>Predictor</em></h1>
+    <p>Each dog is scored 0 to 1 by a LightGBM model trained on age, breed, photos, and the sentiment of the rescuer's description. Higher score means faster adoption.</p>
+    <div class="hero-meta">Belmont University &nbsp;·&nbsp; DSC-4900 &nbsp;·&nbsp; Jayden Cruz &nbsp;·&nbsp; Spring 2026</div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <span class="ctrl-label">Min Adoption Score</span>
+    <div class="slider-row">
+      <input type="range" id="slider" min="0" max="1" step="0.05" value="0">
+      <span class="slider-val" id="sliderVal">0.00</span>
+    </div>
+  </div>
+  <div class="ctrl-group" style="max-width:180px">
+    <span class="ctrl-label">Sort By</span>
+    <select class="sort-sel" id="sortSel">
+      <option value="score-desc">Score: High to Low</option>
+      <option value="score-asc">Score: Low to High</option>
+      <option value="age-asc">Age: Youngest First</option>
+      <option value="name-asc">Name: A to Z</option>
+    </select>
+  </div>
+  <span class="badge" id="badge">24 dogs</span>
+</div>
+
+<div class="grid-wrap">
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div id="mPhoto"></div>
+    <div class="modal-body">
+      <div class="modal-head">
+        <div class="modal-name" id="mName"></div>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-score-box">
+        <div class="msl">Adoption Score (Model Prediction)</div>
+        <div class="msv" id="mScore"></div>
+        <div class="ms-track"><div class="ms-fill" id="mBar"></div></div>
+        <div class="ms-note" id="mNote"></div>
+      </div>
+      <div class="modal-stats" id="mStats"></div>
+      <div class="desc-lbl">Rescuer Description</div>
+      <div class="desc-txt" id="mDesc"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Data from the <a href="https://www.kaggle.com/competitions/petfinder-adoption-prediction/overview" target="_blank">PetFinder Adoption Prediction</a> competition on Kaggle &nbsp;·&nbsp;
+  Scores predicted by LightGBM + VADER NLP &nbsp;·&nbsp;
+  <a href="https://github.com/JaydenCruz2004/Dog-Adoption-Predictor" target="_blank">GitHub</a>
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+// Scores are model predictions from the LightGBM regressor
+// Images are in the images/ folder named {PetID}-1.jpg
+const DOGS = [
+  {id:"5eb7443c7",  name:"Lucas",                  age:18, gender:"Male",   size:"Large",   vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.25, desc:"The dog was injured after being bitten by a German Shepherd. He was treated and is now very fine and healthy. Looking for an owner who loves animals."},
+  {id:"fb5c27aa4",  name:"Ceprat",                 age:96, gender:"Male",   size:"Medium",  vax:"No",       fur:"Long",   fee:50,  photos:5,  score:0.20, desc:"Ceprat is a stray from a plant nursery. Around 8 years old, neutered, very fit and healthy. Human friendly, loves to be accompanied by people, prefers outdoor living."},
+  {id:"7dd97ecfe",  name:"Male Puppy 1",            age:1,  gender:"Male",   size:"Medium",  vax:"No",       fur:"Medium", fee:0,   photos:1,  score:0.48, desc:"This male puppy was given birth by my older female dog. He is currently 5 weeks old. Looking for a loving and responsible owner."},
+  {id:"21d7f07ba",  name:"Maize",                  age:3,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.42, desc:"Nice and cuddly girl. Urgently seeking adoption. Please contact SPCA Penang for further information."},
+  {id:"9c5a4b145",  name:"Brandy",                 age:24, gender:"Male",   size:"Small",   vax:"Not Sure", fur:"Short",  fee:0,   photos:2,  score:0.30, desc:"Rescued from a family who could no longer care for him. Very loyal, attaches to you and stays by your side. Knows basic commands. Urgently needs a good home."},
+  {id:"6b357800a",  name:"Peter",                  age:36, gender:"Male",   size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:8,  score:0.45, desc:"Very friendly dog from Second Chance shelter. Looks much happier than when first seen. Would be a great addition to a family."},
+  {id:"cf62b409e",  name:"Do Re Mi Fa So",          age:2,  gender:"Mixed",  size:"Large",   vax:"No",       fur:"Medium", fee:0,   photos:6,  score:0.50, desc:"Five puppies rescued from the roadside by two students using their own pocket money. They need a home urgently and have been dewormed."},
+  {id:"81d10dff7",  name:"Lucky",                  age:2,  gender:"Female", size:"Medium",  vax:"No",       fur:"Short",  fee:0,   photos:5,  score:0.44, desc:"Waiting to go home."},
+  {id:"03193ad4e",  name:"Starky",                 age:12, gender:"Male",   size:"Small",   vax:"Yes",      fur:"Short",  fee:0,   photos:8,  score:0.55, desc:"Charming and highly intelligent. A joyful dog with a happy and cheeky face. Previously a hit-and-run victim who recovered with a strong will. Let's find Starky a home!"},
+  {id:"138228197",  name:"Found & For Adoption",   age:60, gender:"Male",   size:"Medium",  vax:"Not Sure", fur:"Short",  fee:0,   photos:1,  score:0.22, desc:"Found running along a main road at 11pm. A male Shih Tzu, very energetic. Treated for maggots and now recovering well. Looking for a loving home."},
+  {id:"d3281a835",  name:"No Name",                age:1,  gender:"Female", size:"Large",   vax:"Not Sure", fur:"Medium", fee:0,   photos:2,  score:0.46, desc:"Cute and active girl, loves to play."},
+  {id:"5069fa551",  name:"Panda",                  age:2,  gender:"Male",   size:"Medium",  vax:"No",       fur:"Medium", fee:0,   photos:3,  score:0.43, desc:"Does he look like a panda? He is very active and fun to play with."},
+  {id:"b21940173",  name:"Tami",                   age:3,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Short",  fee:100, photos:2,  score:0.38, desc:"Found with four siblings near the road after their mother died. Already vaccinated. Needs lots of attention and training. Rescuer will follow up after adoption."},
+  {id:"f743529bf",  name:"Teddy",                  age:1,  gender:"Female", size:"Medium",  vax:"No",       fur:"Short",  fee:0,   photos:10, score:0.58, desc:"Teddy is now in Melaka with her new family. Her new name is Tong-Tong."},
+  {id:"57a0b3def",  name:"Mei Mei And Friends",    age:4,  gender:"Mixed",  size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:5,  score:0.46, desc:"Puppies taken home and in need of a new place. They are in good condition and have their own vet."},
+  {id:"9ef159820",  name:"Rina",                   age:8,  gender:"Female", size:"Small",   vax:"Yes",      fur:"Short",  fee:250, photos:2,  score:0.32, desc:"Friendly."},
+  {id:"603a1c912",  name:"J-J Boy",                age:10, gender:"Male",   size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.40, desc:"Free adoption in Ipoh area only. Around 10 months old. Please give me a warm and loving home. Home visit required after adoption."},
+  {id:"db6c077d0",  name:"Pupz PUPz Pupz",         age:2,  gender:"Mixed",  size:"Medium",  vax:"No",       fur:"Medium", fee:0,   photos:9,  score:0.48, desc:"Four healthy and cute pups searching for a mummy or daddy who will give them tons of love. Born August 2009. For serious dog lovers only."},
+  {id:"0f225be32",  name:"Skinny",                 age:9,  gender:"Female", size:"Large",   vax:"No",       fur:"Short",  fee:0,   photos:3,  score:0.38, desc:"Found near a bank three months ago looking very skinny. She barks at strangers but never bites. Loves chasing and hide and seek. Looking for a good owner."},
+  {id:"542af6f78",  name:"2 Little Puppies",       age:1,  gender:"Female", size:"Medium",  vax:"No",       fur:"Short",  fee:0,   photos:3,  score:0.47, desc:"Two little puppies about 3 weeks old. The black one is very active while the cream one is a follower."},
+  {id:"a059a19d9",  name:"Cha Cha",                age:2,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Medium", fee:0,   photos:5,  score:0.52, desc:"Best obedience and companion for kids."},
+  {id:"a2c642a9e",  name:"Cutey",                  age:1,  gender:"Mixed",  size:"Large",   vax:"No",       fur:"Short",  fee:0,   photos:1,  score:0.45, desc:"Healthy, playful and trainable."},
+  {id:"b08bccfc9",  name:"Tag 2",                  age:12, gender:"Male",   size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.35, desc:"Friendly buddy. Urgently seeking adoption. Please contact PAWS for further information."},
+  {id:"23c260cc9",  name:"Grey",                   age:9,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.30, desc:"She is sheltered in an industrial area in Puchong. People are threatening to call the council. Please give her a second chance at life."}
+];
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function scoreColor(s) {
+  if (s >= 0.7) return '#4a7c59';
+  if (s >= 0.45) return '#d4a843';
+  if (s > 0)    return '#c4622d';
+  return '#aaa';
+}
+function scoreClass(s) {
+  if (s >= 0.7)  return 'sc-high';
+  if (s >= 0.45) return 'sc-med';
+  if (s > 0)     return 'sc-low';
+  return 'sc-none';
+}
+function scoreNote(s) {
+  if (s >= 0.9)  return 'Likely adopted same day';
+  if (s >= 0.7)  return 'Likely adopted within a week';
+  if (s >= 0.5)  return 'Likely adopted within a month';
+  if (s >= 0.25) return 'May take up to 3 months';
+  return 'Low likelihood of adoption within 100 days';
+}
+function ageStr(m) {
+  if (m < 1)  return 'Newborn';
+  if (m < 12) return m + ' month' + (m > 1 ? 's' : '') + ' old';
+  const y = Math.floor(m / 12);
+  return y + ' year' + (y > 1 ? 's' : '') + ' old';
+}
+function imgTag(id, isModal) {
+  const h  = isModal ? 280 : 210;
+  const fs = isModal ? 90 : 64;
+  const br = isModal ? 'border-radius:22px 22px 0 0;' : '';
+  return '<div style="width:100%;height:'+h+'px;overflow:hidden;position:relative;background:var(--warm);'+br+'">'
+    + '<img src="images/'+id+'-1.jpg" alt="dog" style="width:100%;height:'+h+'px;object-fit:cover;display:block;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+    + '<div style="display:none;width:100%;height:'+h+'px;align-items:center;justify-content:center;font-size:'+fs+'px;position:absolute;top:0;left:0">🐕</div>'
+    + '</div>';
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const min  = parseFloat(document.getElementById('slider').value);
+  const sort = document.getElementById('sortSel').value;
+
+  let dogs = DOGS.filter(d => d.score >= min);
+  if (sort === 'score-desc') dogs.sort((a,b) => b.score - a.score);
+  else if (sort === 'score-asc') dogs.sort((a,b) => a.score - b.score);
+  else if (sort === 'age-asc')   dogs.sort((a,b) => a.age - b.age);
+  else if (sort === 'name-asc')  dogs.sort((a,b) => a.name.localeCompare(b.name));
+
+  document.getElementById('badge').textContent = dogs.length + ' dog' + (dogs.length !== 1 ? 's' : '');
+
+  if (!dogs.length) {
+    document.getElementById('grid').innerHTML = '<div class="empty"><div class="ei">🔍</div><p>No dogs match that score. Try lowering the slider.</p></div>';
+    return;
+  }
+
+  document.getElementById('grid').innerHTML = dogs.map((d, i) => {
+    const color = scoreColor(d.score);
+    const pct   = Math.round(d.score * 100);
+    return `
+    <div class="card" style="animation-delay:${i * 0.04}s" onclick="openModal('${d.id}')">
+      ${imgTag(d.id, false)}
+      <div class="score-dot ${scoreClass(d.score)}">
+        <span class="snum">${d.score.toFixed(2)}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${d.name}</div>
+        <div class="card-sub">${ageStr(d.age)} &nbsp;·&nbsp; ${d.gender}</div>
+        <div class="bar-wrap">
+          <div class="bar-labels"><span>Adoption Score</span><span style="color:${color}">${pct}%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        </div>
+        <div class="pills">
+          <span class="pill">${d.size}</span>
+          <span class="pill">${d.fur} fur</span>
+          <span class="pill">Vax: ${d.vax}</span>
+          <span class="pill ${d.fee === 0 ? 'free' : 'fee'}">${d.fee === 0 ? 'Free' : 'Fee: $' + d.fee}</span>
+          <span class="pill">${d.photos} photo${d.photos > 1 ? 's' : ''}</span>
+        </div>
+        <div class="card-desc">${d.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  const d = DOGS.find(x => x.id === id);
+  const color = scoreColor(d.score);
+  const pct   = Math.round(d.score * 100);
+
+  document.getElementById('mPhoto').innerHTML = imgTag(d.id, true);
+  document.getElementById('mName').textContent = d.name;
+  document.getElementById('mScore').textContent = d.score.toFixed(2);
+  document.getElementById('mScore').style.color = color;
+  document.getElementById('mBar').style.cssText = 'width:' + pct + '%;background:' + color;
+  document.getElementById('mNote').textContent = scoreNote(d.score);
+  document.getElementById('mDesc').textContent = d.desc;
+
+  document.getElementById('mStats').innerHTML = [
+    ['Age',           ageStr(d.age)],
+    ['Gender',        d.gender],
+    ['Size',          d.size],
+    ['Fur Length',    d.fur],
+    ['Vaccinated',    d.vax],
+    ['Adoption Fee',  d.fee === 0 ? 'Free' : '$' + d.fee],
+    ['Photos',        d.photos + ' uploaded'],
+    ['Pet ID',        d.id]
+  ].map(([l,v]) => `<div class="stat"><div class="stat-l">${l}</div><div class="stat-v">${v}</div></div>`).join('');
+
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── SLIDER ────────────────────────────────────────────────────────────────────
+const slider = document.getElementById('slider');
+slider.addEventListener('input', () => {
+  const v = parseFloat(slider.value);
+  document.getElementById('sliderVal').textContent = v.toFixed(2);
+  slider.style.setProperty('--pct', (v * 100) + '%');
+  render();
+});
+document.getElementById('sortSel').addEventListener('change', render);
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
