@@ -232,35 +232,9 @@
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────────
-// Scores are model predictions from the LightGBM regressor
-// Images are in the images/ folder named {PetID}-1.jpg
-const DOGS = [
-  {id:"5eb7443c7",  name:"Lucas",                  age:18, gender:"Male",   size:"Large",   vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.25, desc:"The dog was injured after being bitten by a German Shepherd. He was treated and is now very fine and healthy. Looking for an owner who loves animals."},
-  {id:"fb5c27aa4",  name:"Ceprat",                 age:96, gender:"Male",   size:"Medium",  vax:"No",       fur:"Long",   fee:50,  photos:5,  score:0.20, desc:"Ceprat is a stray from a plant nursery. Around 8 years old, neutered, very fit and healthy. Human friendly, loves to be accompanied by people, prefers outdoor living."},
-  {id:"7dd97ecfe",  name:"Male Puppy 1",            age:1,  gender:"Male",   size:"Medium",  vax:"No",       fur:"Medium", fee:0,   photos:1,  score:0.48, desc:"This male puppy was given birth by my older female dog. He is currently 5 weeks old. Looking for a loving and responsible owner."},
-  {id:"21d7f07ba",  name:"Maize",                  age:3,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.42, desc:"Nice and cuddly girl. Urgently seeking adoption. Please contact SPCA Penang for further information."},
-  {id:"9c5a4b145",  name:"Brandy",                 age:24, gender:"Male",   size:"Small",   vax:"Not Sure", fur:"Short",  fee:0,   photos:2,  score:0.30, desc:"Rescued from a family who could no longer care for him. Very loyal, attaches to you and stays by your side. Knows basic commands. Urgently needs a good home."},
-  {id:"6b357800a",  name:"Peter",                  age:36, gender:"Male",   size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:8,  score:0.45, desc:"Very friendly dog from Second Chance shelter. Looks much happier than when first seen. Would be a great addition to a family."},
-  {id:"cf62b409e",  name:"Do Re Mi Fa So",          age:2,  gender:"Mixed",  size:"Large",   vax:"No",       fur:"Medium", fee:0,   photos:6,  score:0.50, desc:"Five puppies rescued from the roadside by two students using their own pocket money. They need a home urgently and have been dewormed."},
-  {id:"81d10dff7",  name:"Lucky",                  age:2,  gender:"Female", size:"Medium",  vax:"No",       fur:"Short",  fee:0,   photos:5,  score:0.44, desc:"Waiting to go home."},
-  {id:"03193ad4e",  name:"Starky",                 age:12, gender:"Male",   size:"Small",   vax:"Yes",      fur:"Short",  fee:0,   photos:8,  score:0.55, desc:"Charming and highly intelligent. A joyful dog with a happy and cheeky face. Previously a hit-and-run victim who recovered with a strong will. Let's find Starky a home!"},
-  {id:"138228197",  name:"Found & For Adoption",   age:60, gender:"Male",   size:"Medium",  vax:"Not Sure", fur:"Short",  fee:0,   photos:1,  score:0.22, desc:"Found running along a main road at 11pm. A male Shih Tzu, very energetic. Treated for maggots and now recovering well. Looking for a loving home."},
-  {id:"d3281a835",  name:"No Name",                age:1,  gender:"Female", size:"Large",   vax:"Not Sure", fur:"Medium", fee:0,   photos:2,  score:0.46, desc:"Cute and active girl, loves to play."},
-  {id:"5069fa551",  name:"Panda",                  age:2,  gender:"Male",   size:"Medium",  vax:"No",       fur:"Medium", fee:0,   photos:3,  score:0.43, desc:"Does he look like a panda? He is very active and fun to play with."},
-  {id:"b21940173",  name:"Tami",                   age:3,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Short",  fee:100, photos:2,  score:0.38, desc:"Found with four siblings near the road after their mother died. Already vaccinated. Needs lots of attention and training. Rescuer will follow up after adoption."},
-  {id:"f743529bf",  name:"Teddy",                  age:1,  gender:"Female", size:"Medium",  vax:"No",       fur:"Short",  fee:0,   photos:10, score:0.58, desc:"Teddy is now in Melaka with her new family. Her new name is Tong-Tong."},
-  {id:"57a0b3def",  name:"Mei Mei And Friends",    age:4,  gender:"Mixed",  size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:5,  score:0.46, desc:"Puppies taken home and in need of a new place. They are in good condition and have their own vet."},
-  {id:"9ef159820",  name:"Rina",                   age:8,  gender:"Female", size:"Small",   vax:"Yes",      fur:"Short",  fee:250, photos:2,  score:0.32, desc:"Friendly."},
-  {id:"603a1c912",  name:"J-J Boy",                age:10, gender:"Male",   size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.40, desc:"Free adoption in Ipoh area only. Around 10 months old. Please give me a warm and loving home. Home visit required after adoption."},
-  {id:"db6c077d0",  name:"Pupz PUPz Pupz",         age:2,  gender:"Mixed",  size:"Medium",  vax:"No",       fur:"Medium", fee:0,   photos:9,  score:0.48, desc:"Four healthy and cute pups searching for a mummy or daddy who will give them tons of love. Born August 2009. For serious dog lovers only."},
-  {id:"0f225be32",  name:"Skinny",                 age:9,  gender:"Female", size:"Large",   vax:"No",       fur:"Short",  fee:0,   photos:3,  score:0.38, desc:"Found near a bank three months ago looking very skinny. She barks at strangers but never bites. Loves chasing and hide and seek. Looking for a good owner."},
-  {id:"542af6f78",  name:"2 Little Puppies",       age:1,  gender:"Female", size:"Medium",  vax:"No",       fur:"Short",  fee:0,   photos:3,  score:0.47, desc:"Two little puppies about 3 weeks old. The black one is very active while the cream one is a follower."},
-  {id:"a059a19d9",  name:"Cha Cha",                age:2,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Medium", fee:0,   photos:5,  score:0.52, desc:"Best obedience and companion for kids."},
-  {id:"a2c642a9e",  name:"Cutey",                  age:1,  gender:"Mixed",  size:"Large",   vax:"No",       fur:"Short",  fee:0,   photos:1,  score:0.45, desc:"Healthy, playful and trainable."},
-  {id:"b08bccfc9",  name:"Tag 2",                  age:12, gender:"Male",   size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.35, desc:"Friendly buddy. Urgently seeking adoption. Please contact PAWS for further information."},
-  {id:"23c260cc9",  name:"Grey",                   age:9,  gender:"Female", size:"Medium",  vax:"Yes",      fur:"Short",  fee:0,   photos:1,  score:0.30, desc:"She is sheltered in an industrial area in Puchong. People are threatening to call the council. Please give her a second chance at life."}
-];
-
+// Loaded from dogs.json generated by dogwebsite.py
+// dogs.json contains real model predictions from the LightGBM regressor
+let DOGS = [];
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function scoreColor(s) {
   if (s >= 0.7) return '#4a7c59';
@@ -364,6 +338,9 @@ function openModal(id) {
     ['Size',          d.size],
     ['Fur Length',    d.fur],
     ['Vaccinated',    d.vax],
+    ['Sterilized',    d.sterilized || 'Unknown'],
+    ['Dewormed',      d.dewormed || 'Unknown'],
+    ['Health',        d.health || 'Unknown'],
     ['Adoption Fee',  d.fee === 0 ? 'Free' : '$' + d.fee],
     ['Photos',        d.photos + ' uploaded'],
     ['Pet ID',        d.id]
@@ -391,8 +368,32 @@ slider.addEventListener('input', () => {
 });
 document.getElementById('sortSel').addEventListener('change', render);
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-render();
+// ── INIT — load dogs.json then render ────────────────────────────────────────
+fetch('dogs.json')
+  .then(r => r.json())
+  .then(data => {
+    // map json fields to match what the render functions expect
+    DOGS = data.map(d => ({
+      id:     d.id,
+      name:   d.name,
+      age:    d.age,
+      gender: d.gender,
+      size:   d.size,
+      fur:    d.fur,
+      vax:    d.vax,
+      fee:    d.fee,
+      photos: d.photos,
+      score:  d.score,
+      desc:   d.description,
+      sterilized: d.sterilized,
+      dewormed:   d.dewormed,
+      health:     d.health
+    }));
+    render();
+  })
+  .catch(() => {
+    document.getElementById('grid').innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>Could not load dogs.json. Run dogwebsite.py first.</p></div>';
+  });
 </script>
 </body>
 </html>
